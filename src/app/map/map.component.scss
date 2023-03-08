@@ -1,0 +1,29 @@
+.map-container {
+    margin: 0 auto;
+    height: 80vh;
+    width: 80vw;
+    position: relative;
+}
+
+.overlay {
+    top: 0;
+    left: 0;
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    z-index: 1000;
+}
+
+.modal {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    -webkit-transform: translate(-50%, -50%);
+    transform: translate(-50%, -50%);
+    width: 30vw;
+    height: 30vh;
+    z-index: 100;
+    background-color: #fff;
+    border-radius: 5px;
+    padding: 20px;
+}

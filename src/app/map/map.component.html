@@ -1,0 +1,32 @@
+<div *ngIf="showModal$ | async" class="overlay">
+    <div class="modal">
+        <div class="modal-content" *ngIf="markerDetails">
+            <div class="marker-details">
+                <p>{{markerDetails.index+1}}</p>
+                <span>Lat</span>
+                <p>{{markerDetails.latlng.lat}}</p>
+                <span>Lng</span>
+                <p>{{markerDetails.latlng.lng}}</p>
+                <p>{{altitude}}</p>
+            </div>
+            <div *ngIf="editModeEnebled$ | async" class="edit-details">
+                <div class="formGroup">
+                    <span>Latitude</span><label for="lat"></label>
+                    <input type="numer" name="lat" [(ngModel)]="lat" />
+                </div>
+                <div class="formGroup">
+                    <span>Longitude</span><label for="long"></label>
+                    <input type="numer" name="long" [(ngModel)]="long" />
+                </div>
+
+                <button (click)="cancelEditMarker()">cancel</button>
+                <button (click)="updateEditMarker()">save</button>
+            </div>
+        </div>
+        <button (click)="removeMarker(markerDetails.marker)">delete</button>
+        <button (click)="closeModal()">close</button>
+        <button (click)="editMarker()">edit parameters</button>
+        <button (click)="sendMarkers()">send markers</button>
+    </div>
+</div>
+<div class="map-container" id="map"></div>
