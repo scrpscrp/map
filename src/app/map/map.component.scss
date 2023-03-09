@@ -12,18 +12,69 @@
     height: 100%;
     width: 100%;
     z-index: 1000;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .modal {
-    position: absolute;
-    left: 50%;
-    top: 50%;
-    -webkit-transform: translate(-50%, -50%);
-    transform: translate(-50%, -50%);
-    width: 30vw;
-    height: 30vh;
+    position: relative;
+    width: 40vw;
+    height: 40vh;
     z-index: 100;
     background-color: #fff;
     border-radius: 5px;
     padding: 20px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    align-items: center;
+}
+
+.modal-content {
+    width: 100%;
+    font-size: 20px;
+    display: flex;
+    justify-content: space-between;
+}
+
+.marker-details,
+.edit-details {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: 1rem;
+}
+
+.marker-details span,
+.edit-details span {
+    font-weight: bold;
+}
+
+.modal-buttons {
+    display: flex;
+    gap: 1rem;
+}
+
+.form-group {
+    display: flex;
+    gap: 1rem;
+    align-items: center;
+}
+
+button {
+    cursor: pointer;
+    background-color: #f8f8f8;
+    color: #333;
+    border: none;
+    border-radius: 3px;
+    padding: 0.5rem 1rem;
+    font-size: 1rem;
+    transition: background-color 0.2s ease-in-out;
+}
+
+button:hover {
+    background-color: #333;
+    color: #f8f8f8;
 }

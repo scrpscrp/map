@@ -1,32 +1,36 @@
+<div class="map-container" id="map"></div>
+
 <div *ngIf="showModal$ | async" class="overlay">
     <div class="modal">
         <div class="modal-content" *ngIf="markerDetails">
             <div class="marker-details">
-                <p>{{markerDetails.index+1}}</p>
-                <span>Lat</span>
+                <h3>Index {{markerDetails.index+1}}</h3>
+                <span>Latitude</span>
                 <p>{{markerDetails.latlng.lat}}</p>
-                <span>Lng</span>
+                <span>Longitude</span>
                 <p>{{markerDetails.latlng.lng}}</p>
                 <p>{{altitude}}</p>
             </div>
-            <div *ngIf="editModeEnebled$ | async" class="edit-details">
-                <div class="formGroup">
-                    <span>Latitude</span><label for="lat"></label>
-                    <input type="numer" name="lat" [(ngModel)]="lat" />
+            <div *ngIf="editModeEnabled$ | async" class="edit-details">
+                <div class="form-group">
+                    <span>Latitude</span>
+                    <input type="number" name="lat" [(ngModel)]="lat" />
                 </div>
-                <div class="formGroup">
-                    <span>Longitude</span><label for="long"></label>
-                    <input type="numer" name="long" [(ngModel)]="long" />
+                <div class="form-group">
+                    <span>Longitude</span>
+                    <input type="number" name="long" [(ngModel)]="long" />
                 </div>
-
-                <button (click)="cancelEditMarker()">cancel</button>
-                <button (click)="updateEditMarker()">save</button>
+                <div class="form-group">
+                    <button (click)="cancelEditMarker()">Cancel</button>
+                    <button (click)="updateEditMarker()">Save</button>
+                </div>
             </div>
         </div>
-        <button (click)="removeMarker(markerDetails.marker)">delete</button>
-        <button (click)="closeModal()">close</button>
-        <button (click)="editMarker()">edit parameters</button>
-        <button (click)="sendMarkers()">send markers</button>
+        <div class="modal-buttons">
+            <button (click)="removeMarker(markerDetails.marker)">Delete</button>
+            <button (click)="closeModal()">Close</button>
+            <button (click)="editMarker()">Edit Parameters</button>
+            <button (click)="sendMarkers()">Send Markers</button>
+        </div>
     </div>
 </div>
-<div class="map-container" id="map"></div>

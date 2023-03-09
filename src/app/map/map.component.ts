@@ -1,83 +1,88 @@
 import { HttpClient } from '@angular/common/http';
-import { ChangeDetectorRef, Component , OnInit} from '@angular/core';
-import * as L from 'leaflet'; 
+import { ChangeDetectorRef, Component, OnInit } from '@angular/core';
+import * as L from 'leaflet';
 import 'leaflet-polylinedecorator';
-import { BehaviorSubject, concatMap } from 'rxjs';
+import { BehaviorSubject } from 'rxjs';
 import { MarkerService } from './marker.service';
 
-
-
 L.Icon.Default.imagePath = 'assets/';
+
+interface MarkerDetails {
+  marker: L.Marker;
+  latlng: L.LatLng;
+  index: number;
+}
 
 @Component({
   selector: 'app-map',
   templateUrl: './map.component.html',
   styleUrls: ['./map.component.scss']
 })
-export class MapComponent implements OnInit  {
-  showModal$: BehaviorSubject <boolean> = new BehaviorSubject<boolean>(false);
-  editModeEnebled$ : BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
-  markerDetails:any;
+export class MapComponent implements OnInit {
+  showModal$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  editModeEnabled$: BehaviorSubject<boolean> = new BehaviorSubject<boolean>(false);
+  markerDetails: MarkerDetails;
   map!: L.Map;
   markers: L.Marker[] = [];
-  altitude: number = null;
-  lat: number = null;
-  long: number = null;
+  altitude: number | null = null;
+  lat: number | null = null;
+  long: number | null = null;
   route: L.Polyline;
   routePoints: L.LatLng[] = [];
   polylines: L.Polyline[] = [];
-  polylineDecorator: L.PolylineDecorator = null;
+  polylineDecorator: L.PolylineDecorator | null = null;
 
+  constructor(private cdr: ChangeDetectorRef, private markersService: MarkerService, private http: HttpClient) {}
 
-  constructor( private cdr: ChangeDetectorRef, private markersService: MarkerService, private http: HttpClient) { }
-
-  ngOnInit() {
+  ngOnInit(): void {
     this.initMap();
-
   }
 
   private initMap(): void {
-  this.map = L.map('map').setView([50.26, 30.30], 13);
-  L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
-    maxZoom: 18
-  }).addTo(this.map);
-
-  this.map.on('click', (e: L.LeafletMouseEvent) => {
-    const icon = L.divIcon({
-      className: 'marker-index-icon', 
-      html: '<div class="marker-index-label">' + (this.markers.length+1) + '</div>',
-    });
-    const marker = L.marker(e.latlng, {
-      draggable: true,
-      icon: icon
+    this.map = L.map('map').setView([50.26, 30.30], 13);
+    L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+      attribution: 'Map data © <a href="https://openstreetmap.org">OpenStreetMap</a> contributors',
+      maxZoom: 18
     }).addTo(this.map);
-    this.markers.push(marker);
-    this.routePoints.push(e.latlng);
-    this.getAltitude(marker)
-    
-    
-    marker.on('click', () => {
-      const latlng = marker.getLatLng();
-      const index = this.markers.indexOf(marker);
-      this.markerDetails = {
-        marker: marker,
-        latlng: latlng,
-        index: index
-      }
-      this.showModalMarker(this.markerDetails);
-    });
-    marker.on('drag', (e: L.LeafletEvent) => {
-      const latlng = e.target.getLatLng();
-      this.markerDetails.latlng = latlng;
-    });
 
-    this.initRoute();
-    marker.setIcon(icon);
+    this.map.on('click', (e: L.LeafletMouseEvent) => {
+      const icon = L.divIcon({
+        className: 'marker-index-icon',
+        html: '<div class="marker-index-label">' + (this.markers.length + 1) + '</div>'
+      });
+      const marker = L.marker(e.latlng, {
+        draggable: true,
+        icon: icon
+      }).addTo(this.map);
+      this.markers.push(marker);
+      this.routePoints.push(e.latlng);
+
+      marker.on('click', () => {
+        const latlng = marker.getLatLng();
+        const index = this.markers.indexOf(marker);
+        this.markerDetails = {
+          marker: marker,
+          latlng: latlng,
+          index: index
+        };
+        this.showModalMarker(this.markerDetails);
+      });
+
+      marker.on('drag', (e: L.LeafletEvent) => {
+        const latlng = e.target.getLatLng();
+        this.markerDetails.latlng = latlng;
+      });
+
+      marker.on('dragend', () => {
+        this.updateRoutePoints();
+      });
+
+      this.initRoute();
+      marker.setIcon(icon);
     });
   }
 
-  private initRoute() {
+  private initRoute(): void {
     this.route = L.polyline(this.routePoints, { color: 'red' }).addTo(this.map);
     this.polylines.push(this.route);
     this.polylineDecorator = L.polylineDecorator(this.route, {
@@ -90,82 +95,83 @@ export class MapComponent implements OnInit  {
       ]
     }).addTo(this.map);
   }
-  showModalMarker(marker:any) {
-  this.showModal$.next(!!marker)
-  }
 
-  getAltitude(marker: L.Marker) {
-    const lat = marker.getLatLng().lat;
-    const lng = marker.getLatLng().lng;
-    const apiKey = 'AIzaSyCNXr-dhJnoekDt8vI6VBxdd63Z36xTbIA';
-    const url = `https://maps.googleapis.com/maps/api/elevation/json?locations=${lat},${lng}&key=${apiKey}`;
-    this.http.get(url).subscribe((data: any) => {
-      if (data.results.length > 0) {
-        const altitude = data.results[0].elevation;
-        console.log('Altitude:', altitude);
-      } else {
-        console.error('No elevation data found.');
-      }
-    }, error => {
-      console.error('Error getting elevation data:', error);
-    });
+  showModalMarker(marker: MarkerDetails): void {
+    this.showModal$.next(!!marker);
   }
-
-  closeModal() {
+  
+  closeModal(): void {
     this.showModal$.next(false);
+    this.editModeEnabled$.next(false);
+    this.lat = null;
+    this.long = null;
   }
-
+  
   removeMarker(marker: L.Marker): void {
     const index = this.markers.indexOf(marker);
-  if (index !== -1) {
-    this.markers.splice(index, 1);
-    this.routePoints.splice(index, 1);
-    this.markers.forEach((m, i) => {
+    if (index !== -1) {
+      this.markers.splice(index, 1);
+      this.routePoints.splice(index, 1);
+      this.updateMarkerIcons();
+      this.removeMarkerFromMap(marker);
+      this.removePolylinesFromMap();
+      this.initRoute();
+    }
+  }
+  
+  updateMarkerIcons(): void {
+    this.markers.forEach((marker, index) => {
       const icon = L.divIcon({
         className: 'marker-index-icon',
-        html: '<div class="marker-index-label">' + (i + 1) + '</div>',
+        html: `<div class="marker-index-label">${index + 1}</div>`,
       });
-      m.setIcon(icon);
+      marker.setIcon(icon);
     });
+  }
+  
+  removeMarkerFromMap(marker: L.Marker): void {
     this.map.removeLayer(marker);
+  }
+  
+  removePolylinesFromMap(): void {
     this.polylines.forEach(polyline => {
       this.map.removeLayer(polyline);
     });
     this.polylines = [];
+    this.polylineDecorator.remove();
+  }
+  
+  editMarker(): void {
+    this.editModeEnabled$.next(true);
+  }
+  
+  cancelEditMarker(): void {
+    this.editModeEnabled$.next(false);
+  }
+  
+  updateEditMarker(): void {
+    const marker = this.markers[this.markerDetails.index];
+    marker.setLatLng({ lat: this.lat, lng: this.long });
+    this.updateRoutePoints();
+    this.editModeEnabled$.next(false);
     this.closeModal();
+  }
+  
+  updateRoutePoints(): void {
+    this.removePolylinesFromMap();
+    this.routePoints = this.markers.map(marker => marker.getLatLng());
     this.initRoute();
   }
-  }
-
-  editMarker() {
-    this.editModeEnebled$.next(true);
-  }
-  cancelEditMarker() {
-    this.editModeEnebled$.next(false);
-  }
-  updateEditMarker() {
-    this.markers[this.markerDetails.index].setLatLng({
-      lat: this.lat,
-      lng: this.long
-    })
-    this.editModeEnebled$.next(false);
-    this.closeModal();
-  }
+  
   sendMarkers(): void {
-    const markers = this.markers.map(marker => {
-      return {
-        lat: marker.getLatLng().lat,
-        lng: marker.getLatLng().lng
-      };
+    const markers = this.markers.map(marker => ({
+      lat: marker.getLatLng().lat,
+      lng: marker.getLatLng().lng,
+    }));
+    this.markersService.sendMarkers(markers).subscribe({
+      next: response => console.log('Markers sent to server:', response),
+      error: error => console.error('Error sending markers to server:', error),
     });
-    this.markersService.sendMarkers(markers).subscribe(
-      response => {
-        console.log('Markers sent to server:', response);
-      },
-      error => {
-        console.error('Error sending markers to server:', error);
-      }
-    );
   }
-
+  
 }
