@@ -15,6 +15,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    background-color: rgba(0, 0, 0, 0.38)
 }
 
 .modal {
@@ -22,7 +23,7 @@
     width: 40vw;
     height: 40vh;
     z-index: 100;
-    background-color: #fff;
+    background-color: #ffffff;
     border-radius: 5px;
     padding: 20px;
     display: flex;
@@ -65,7 +66,7 @@
 
 button {
     cursor: pointer;
-    background-color: #f8f8f8;
+    background-color: #ebebeb;
     color: #333;
     border: none;
     border-radius: 3px;
@@ -76,5 +77,5 @@ button {
 
 button:hover {
     background-color: #333;
-    color: #f8f8f8;
+    color: #ffffff;
 }

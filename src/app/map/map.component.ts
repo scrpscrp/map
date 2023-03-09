@@ -116,6 +116,7 @@ export class MapComponent implements OnInit {
       this.removeMarkerFromMap(marker);
       this.removePolylinesFromMap();
       this.initRoute();
+      this.closeModal();
     }
   }
   
